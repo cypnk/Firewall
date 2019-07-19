@@ -256,6 +256,27 @@ function fw_inSubnet( $ip, $subnet ) {
 	return false;
 }
 
+// Browser User Agent
+function fw_getUA() {
+	static $ua;
+	
+	if ( isset( $ua ) ) {
+		return $ua;
+	}
+	$ua	= trim( $_SERVER['HTTP_USER_AGENT'] ?? '' );
+	return $ua;
+}
+
+// Current querystring, if present
+function fw_getQS() {
+	static $qs;
+	if ( isset( $qs ) ) {
+		return $qs;
+	}
+	$qs	= $_SERVER['QUERY_STRING'] ?? '';
+	return $qs;
+}
+
 // Best effort IP address
 function fw_getIP() {
 	static $ip;
@@ -280,7 +301,12 @@ function fw_getIP() {
 }
 
 function fw_uaCheck() {
-	$ua	= $_SERVER['HTTP_USER_AGENT'];
+	$ua	= fw_getUA();
+	
+	// User Agent contains non-ASCII characters?
+	if ( !\mb_check_encoding( $ua, 'ASCII' ) ) {
+		return true;s
+	}
 	
 	// Starting flags
 	static $ua_start = [
@@ -926,7 +952,7 @@ function fw_uriCheck() {
 		'w00tw00t'
 	];
 	
-	$qs = $_SERVER['QUERY_STRING'] ?? '';
+	$qs = fw_getQS();
 	return fw_needleSearch( $qs, $uri_frags );
 }
 
@@ -1080,7 +1106,6 @@ function fw_browserCheck( $ua, $val ) {
 			return true;
 		}
 	}
-
 	
 	return fw_browserCompat( $ua );
 }
@@ -1156,9 +1181,6 @@ function fw_botCheck() {
 		"220.181.0.0/16"
 	];
 	
-	$qs = $_SERVER['QUERY_STRING'] ?? '';
-	$ua = $_SERVER['HTTP_USER_AGENT'];
-	
 	// Martians
 	if ( fw_inSubnet( $ip, $never ) ) {
 		return true;
@@ -1170,6 +1192,8 @@ function fw_botCheck() {
 			return true;
 		}
 	}
+	
+	$ua = fw_getUA();
 	
 	/**
 	 *  Search engine checks
@@ -1220,7 +1244,8 @@ function fw_getMethod() {
 		return $method;
 	}
 	
-	$method = \strtolower( $_SERVER['REQUEST_METHOD'] );
+	$method = 
+	\strtolower( trim( $_SERVER['REQUEST_METHOD'] ?? '' ) );
 	return $method;
 }
 
@@ -1338,7 +1363,7 @@ function fw_headerCheck() {
 		}
 	}
 	
-	$ua	= $_SERVER['HTTP_USER_AGENT'];
+	$ua	= fw_getUA()
 	
 	// Probably not a bot. Then check browser
 	return fw_browserCheck( $ua, $val );
@@ -1347,8 +1372,8 @@ function fw_headerCheck() {
 function fw_sanityCheck() {
 	// None of these should be empty
 	$pr	= trim( $_SERVER['SERVER_PROTOCOL'] ?? '' );
-	$ua	= trim( $_SERVER['HTTP_USER_AGENT'] ?? '' );
-	$mt	= trim( $_SERVER['REQUEST_METHOD'] ?? '' );
+	$ua	= fw_getUA();
+	$mt	= fw_getMethod();
 	
 	if ( empty( $pr ) || empty( $ua ) || empty( $mt ) ) {
 		return true;
@@ -1388,9 +1413,9 @@ function fw_insertLog() {
 	$stm	= $db->prepare( FIREWALL_DB_INSERT );
 	$stm->execute( [
 		':ip'		=> fw_getIP(), 
-		':ua'		=> $_SERVER['HTTP_USER_AGENT'] ?? '', 
-		':uri'		=> $_SERVER['QUERY_STRING'] ?? '', 
-		':method'	=> $_SERVER['REQUEST_METHOD'] ?? '', 
+		':ua'		=> fw_getUA(), 
+		':uri'		=> fw_getQS(), 
+		':method'	=> fw_getMethod(), 
 		':headers'	=> \implode( "\n", fw_getHeaders() )
 	] );
 	
