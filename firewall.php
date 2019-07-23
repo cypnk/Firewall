@@ -73,8 +73,10 @@ CREATE INDEX idx_firewall_on_created ON firewall ( created ASC );-- --
 CREATE TRIGGER firewall_insert AFTER INSERT ON firewall FOR EACH ROW 
 BEGIN
 	UPDATE firewall SET 
-		expires = datetime( strftime( '%s','now' ) + 604800 )
-		WHERE rowid = NEW.rowid;
+		expires = datetime( 
+			( strftime( '%s','now' ) + 604800 ), 
+			'unixepoch'
+		) WHERE rowid = NEW.rowid;
 	
 	DELETE FROM firewall WHERE 
 		strftime( '%s', expires ) < 
