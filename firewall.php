@@ -1280,7 +1280,7 @@ function fw_checkReferer( $ref ) {
 	}
 	
 	// These shouldn't have referer
-	if ( !in_array( 
+	if ( \in_array( 
 		$verb, 
 		[ 'put', 'delete', 'patch', 'options', 'head' ] 
 	) ) {
