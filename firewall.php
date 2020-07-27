@@ -456,6 +456,7 @@ function fw_uaCheck() {
 		'compatible ;',
 		'compatible-',
 		
+		'Cool ',
 		'cognitiveseo',
 		'CoralWebPrx',
 		'core-project',
@@ -526,9 +527,11 @@ function fw_uaCheck() {
 		'Generic',
 		'GetRight',
 		'GetWeb!',
+		'Ghost',
 		'Gluten Free Crawler',
 		'Go!Zilla',
 		'Go-Ahead-Got-It',
+		'Go-http-client',
 		'gotit',
 		
 		// Fake Googlebot
@@ -632,6 +635,10 @@ function fw_uaCheck() {
 		'Mag-Net',
 		'MarkWatch',
 		'Mata.Hari',
+		
+		// Automated tool (can be abused)
+		'Mechanize',
+		
 		'Memo',
 		'Meterpreter/Windows',
 		'Microsoft URL',
@@ -686,6 +693,7 @@ function fw_uaCheck() {
 		'Nikto',
 		'Ninja',
 		'Nimble',
+		'Nmap',
 		'NPbot',
 		'Nomad',
 		'Nutch',
@@ -738,6 +746,12 @@ function fw_uaCheck() {
 		// Revisions are always numbers, not x
 		'rv:x.',
 		
+		// Misconfigured bot
+		'rv:geckoversion',
+		
+		// Scraper
+		'Scrapy',
+		
 		'Shockwave Flash',
 		'SemrushBot',
 		'sentiment',
@@ -784,6 +798,7 @@ function fw_uaCheck() {
 		'Touch ;',
 		
 		'TrackBack',
+		'trandoshan',
 		'Trellian',
 		
 		// Misspelled "Trident"
@@ -916,6 +931,7 @@ function fw_uriCheck() {
 		'#',
 		
 		// Potential vulnerability scan
+		'.git/',
 		'%7e',
 		'<?=`$_',
 		'<?php',
