@@ -131,7 +131,7 @@ function fw_getDb( bool $close = false ) {
 			$db->exec( 'PRAGMA secure_delete = "1"' );
 			
 			// Run create
-			$sql	= \explode( \FIREWALL_DB_PREP, '-- --' );
+			$sql	= \explode( '-- --', \FIREWALL_DB_PREP );
 			foreach( $sql as $q ) {
 				if ( empty( trim( $q ) ) ) {
 					continue;
@@ -342,7 +342,6 @@ function fw_uaCheck() {
 	static $ua_frags = [
 		// Injection in the UA
 		'<?php',
-		'IDATH‰c\<?=',
 		'IDATH.c\<?',
 		'<?=`$_',
 		'IDATH.c??<script',
@@ -963,7 +962,6 @@ function fw_uriCheck() {
 		'%27%23',
 		'%27 %23',
 		'benchmark%28',
-		'IDATH‰c\<?=',
 		'IDATH.c\<?',
 		'IDATH.c??<script',
 		'IDATHKc??<script',
@@ -1277,7 +1275,7 @@ function fw_checkReferer( $ref ) {
 	$srv	= $_SERVER['SERVER_NAME'] ?? '';
 	$verb	= fw_getMethod();
 	
-	if ( empty( $srv ) && $verb != 'get' ) {
+	if ( !SKIP_LOCAL && empty( $srv ) && $verb != 'get' ) {
 		return true;
 	}
 	
