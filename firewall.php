@@ -41,11 +41,14 @@ define( 'FIREWALL_DB',
 //	\realpath( \dirname( __FILE__, 2 ) ) . '/data/firewall.db' );
 
 
-
 /**********************
  *  Configuration end
  **********************/
 
+
+if ( !defined( 'DATA_TIMEOUT' ) ) {
+	define( 'DATA_TIMEOUT', 10 );
+}
 
 
 if ( !defined( 'SKIP_LOCAL' ) ) {
@@ -103,10 +106,8 @@ function fw_getDb( bool $close = false ) {
 	try {
 		// Connection options
 		$opts	= [
-			\PDO::ATTR_TIMEOUT		=> 
-				\DATA_TIMEOUT,
-			\PDO::ATTR_DEFAULT_FETCH_MODE	=> 
-				\PDO::FETCH_ASSOC,
+			\PDO::ATTR_TIMEOUT		=> \DATA_TIMEOUT,
+			\PDO::ATTR_DEFAULT_FETCH_MODE	=> \PDO::FETCH_ASSOC,
 			\PDO::ATTR_PERSISTENT		=> false,
 			\PDO::ATTR_EMULATE_PREPARES	=> false,
 			\PDO::ATTR_ERRMODE		=> 
@@ -114,22 +115,27 @@ function fw_getDb( bool $close = false ) {
 		];
 		
 		$first_run = false;
-		if ( !\file_exists( FIREWALL_DB ) ) {
+		if ( !\file_exists( \FIREWALL_DB ) ) {
 			$first_run = true;
 		}
 		
 		$db	= 
-		new \PDO( 'sqlite:' . FIREWALL_DB, null, null, $opts );
+		new \PDO( 'sqlite:' . \FIREWALL_DB, null, null, $opts );
 		
 		// New database? Create tables and presets
 		if ( $first_run ) {
 			$db->exec( 'PRAGMA encoding = "UTF-8";' );
+			$db->exec( 'PRAGMA page_size = "16384";' );
 			$db->exec( 'PRAGMA auto_vacuum = "2";' );
 			$db->exec( 'PRAGMA temp_store = "2";' );
+			$db->exec( 'PRAGMA secure_delete = "1"' );
 			
 			// Run create
-			$sql	= \explode( FIREWALL_DB_PREP, '-- --' );
+			$sql	= \explode( \FIREWALL_DB_PREP, '-- --' );
 			foreach( $sql as $q ) {
+				if ( empty( trim( $q ) ) ) {
+					continue;
+				}
 				$db->exec( $q );
 			}	
 		}
@@ -307,7 +313,7 @@ function fw_uaCheck() {
 	
 	// User Agent contains non-ASCII characters?
 	if ( !\mb_check_encoding( $ua, 'ASCII' ) ) {
-		return true;s
+		return true;
 	}
 	
 	// Starting flags
@@ -1288,7 +1294,7 @@ function fw_checkReferer( $ref ) {
 	
 	// Post should only come from current host
 	if ( 
-		0 == \strcasecmp( 'post' $verb ) && 
+		0 == \strcasecmp( 'post', $verb ) && 
 		0 != \strcasecmp( $srv, $host ) 
 	) {
 		return true;
@@ -1381,7 +1387,7 @@ function fw_headerCheck() {
 		}
 	}
 	
-	$ua	= fw_getUA()
+	$ua	= fw_getUA();
 	
 	// Probably not a bot. Then check browser
 	return fw_browserCheck( $ua, $val );
@@ -1428,7 +1434,7 @@ function fw_sanityCheck() {
 
 function fw_insertLog() {
 	$db	= fw_getDb();
-	$stm	= $db->prepare( FIREWALL_DB_INSERT );
+	$stm	= $db->prepare( \FIREWALL_DB_INSERT );
 	$stm->execute( [
 		':ip'		=> fw_getIP(), 
 		':ua'		=> fw_getUA(), 
