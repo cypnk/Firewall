@@ -1342,14 +1342,14 @@ function fw_headerCheck() {
 	}
 	
 	// Fail, if "referrer" correctly spelled
-	if ( \array_key_exists( 'referer', $val ) ) {
+	if ( \array_key_exists( 'referrer', $val ) ) {
 		return true;
 	}
 	
 	// Should not be empty, if set, and must contain a colon (:)
-	if ( \array_key_exists( 'referrer', $val ) ) {
-		$ref	= $val['referrer'] ?? '';
-		if ( empty( $val['referrer'] ) ) {
+	if ( \array_key_exists( 'referer', $val ) ) {
+		$ref	= $val['referer'] ?? '';
+		if ( empty( $ref ) ) {
 			return true;
 		}
 		if ( !fw_has( $ref, ':' ) ) {
