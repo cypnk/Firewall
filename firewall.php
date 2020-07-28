@@ -947,6 +947,10 @@ function fw_uriCheck() {
 		'/.zsh_',
 		'/.zshrc',
 		'/.vimrc',
+		'/composer.lock',
+		'/.bsh.serverlet.',
+		'/.mysql_',
+		'/nohup.out',
 		'%7e',
 		'<?=`$_',
 		'<?php',
@@ -1372,7 +1376,7 @@ function fw_headerCheck() {
 	}
 	
 	// Contradicting or empty connections
-	$cn	= $val['connection'];
+	$cn	= $val['connection'] ?? '';
 	if ( ( 
 		fw_has( $cn, 'Keep-Alive' ) && 
 		fw_has( $cn, 'Close' ) 
