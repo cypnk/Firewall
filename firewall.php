@@ -151,6 +151,7 @@ function fw_getDb( bool $close = false ) {
 
 // End response immediately
 function fw_instaKill() {
+	fw_insertLog();
 	\http_response_code( 403 );
 	die( KILL_MSG );
 }
@@ -1460,18 +1461,23 @@ function fw_insertLog() {
 }
 
 function fw_start() {
+	// Filters
+	static $filters = [ 
+		'fw_sanityCheck', 
+		'fw_uriCheck', 
+		'fw_uaCheck', 
+		'fw_headerCheck', 
+		'fw_botCheck'
+	];
+	
 	// Fresh request
-	if (
-		fw_sanityCheck()	|| 
-		fw_uriCheck()		|| 
-		fw_botCheck()		|| 
-		fw_uaCheck()		|| 
-		fw_headerCheck()
-	) {
-		fw_insertLog();
-		
-		// Send kill
-		fw_instaKill();
+	foreach ( $filters as $f ) {
+		if ( $f() ) {
+			fw_instaKill();
+			
+			// Fallback
+			break;
+		}
 	}
 }
 
