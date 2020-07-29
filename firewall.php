@@ -41,6 +41,11 @@ define( 'FIREWALL_DB',
 //	\realpath( \dirname( __FILE__, 2 ) ) . '/data/firewall.db' );
 
 
+// Whitelist of HTTP methods (these fall through to be handled by your script)
+define( 'FIREWALL_METHODS', 
+	'get, post, head, connect, options, patch, delete, put' );
+
+
 /**********************
  *  Configuration end
  **********************/
@@ -154,6 +159,13 @@ function fw_instaKill() {
 	fw_insertLog();
 	\http_response_code( 403 );
 	die( KILL_MSG );
+}
+
+
+// String to list helper
+function fw_trimmedList( $text, $lower = false ) {
+	$map = \array_map( 'trim', \explode( ',', $text ) );
+	return $lower ? \array_map( 'strtolower', $map ) : $map;
 }
 
 // String contains a fragment
@@ -939,6 +951,9 @@ function fw_uriCheck() {
 		// Shouldn't see fragments in the URI sent to the server
 		'#',
 		
+		// Acme-client should never get as far as PHP
+		'/.well-known/',
+		
 		// Potential vulnerability scan
 		'.^M.',
 		'.git/',
@@ -1345,6 +1360,20 @@ function fw_getHeaders() {
 function fw_headerCheck() {
 	$val = fw_getHeaders();
 	
+	// Contradicting or empty connections
+	$cn	= $val['connection'] ?? '';
+	if ( empty( $cn ) || ( 
+		fw_has( $cn, 'Keep-Alive' ) && 
+		fw_has( $cn, 'Close' ) 
+	) ) {
+		return true;
+	}
+	
+	// Fail, if "referrer" correctly spelled
+	if ( \array_key_exists( 'referrer', $val ) ) {
+		return true;
+	}
+	
 	if ( 
 		// Must not be used
 		\array_key_exists( 'proxy-connection', $val )	|| 
@@ -1353,11 +1382,6 @@ function fw_headerCheck() {
 		// Suspect request headers
 		\array_key_exists( 'x-aaaaaaaaaa', $val )
 	) {
-		return true;
-	}
-	
-	// Fail, if "referrer" correctly spelled
-	if ( \array_key_exists( 'referrer', $val ) ) {
 		return true;
 	}
 	
@@ -1374,15 +1398,6 @@ function fw_headerCheck() {
 		if ( fw_checkReferer( $ref ) ) {
 			return true;
 		}
-	}
-	
-	// Contradicting or empty connections
-	$cn	= $val['connection'] ?? '';
-	if ( ( 
-		fw_has( $cn, 'Keep-Alive' ) && 
-		fw_has( $cn, 'Close' ) 
-	) || empty( $cn ) ) {
-		return true;
 	}
 	
 	// Repeated words in connection? E.G. "close, close"
@@ -1427,22 +1442,8 @@ function fw_sanityCheck() {
 		return true;
 	}
 	
-	// Allowed HTTP methods
-	switch( fw_getMethod() ) {
-		case 'get':
-		case 'post':
-		case 'head':
-		case 'connect':
-		case 'options':
-		case 'patch':
-		case 'delete':
-		case 'put':
-			return false;
-		
-		// Unrecognized method (E.G TRACE can be exploited)
-		default:
-			return true;
-	}
+	// Check if not in allowed HTTP methods
+	return !\in_array( $mt, fw_trimmedList( \FIREWALL_METHODS, true ) );
 }
 
 function fw_insertLog() {
