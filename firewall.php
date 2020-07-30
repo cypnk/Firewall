@@ -71,6 +71,7 @@ CREATE TABLE firewall (
 	method TEXT NOT NULL, 
 	headers TEXT NOT NULL, 
 	expires DATETIME DEFAULT NULL,
+	updated DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	created DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );-- --
 CREATE INDEX idx_firewall_on_reason ON firewall ( reason );-- --
@@ -93,7 +94,7 @@ CREATE TRIGGER firewall_insert AFTER INSERT ON firewall FOR EACH ROW
 BEGIN
 	DELETE FROM firewall WHERE 
 		strftime( '%s', expires ) < 
-		strftime( '%s', created );
+		strftime( '%s', updated );
 END;
 SQL
 );
