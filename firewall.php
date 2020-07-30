@@ -64,6 +64,7 @@ if ( !defined( 'SKIP_LOCAL' ) ) {
 define( 'FIREWALL_DB_PREP', <<<SQL
 CREATE TABLE firewall (
 	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
+	reason TEXT NOT NULL,
 	ip TEXT NOT NULL, 
 	ua TEXT NOT NULL, 
 	uri TEXT NOT NULL, 
@@ -72,6 +73,7 @@ CREATE TABLE firewall (
 	expires DATETIME DEFAULT NULL,
 	created DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );-- --
+CREATE INDEX idx_firewall_on_reason ON firewall ( reason );-- --
 CREATE INDEX idx_firewall_on_ip ON firewall ( ip ASC );-- --
 CREATE INDEX idx_firewall_on_ua ON firewall ( ua ASC );-- --
 CREATE INDEX idx_firewall_on_uri ON firewall ( uri ASC );-- --
@@ -94,8 +96,8 @@ SQL
 );
 
 define( 'FIREWALL_DB_INSERT', <<<SQL
-INSERT INTO firewall ( ip, ua, uri, method, headers ) 
-	VALUES ( :ip, :ua, :uri, :method, :headers );
+INSERT INTO firewall ( reason, ip, ua, uri, method, headers ) 
+	VALUES ( :reason, :ip, :ua, :uri, :method, :headers );
 SQL
 );
 
@@ -155,8 +157,9 @@ function fw_getDb( bool $close = false ) {
 }
 
 // End response immediately
-function fw_instaKill() {
-	fw_insertLog();
+function fw_instaKill( string $reason ) {
+	$fw = trim( 'Firewall ' . $reason );
+	fw_insertLog( $fw );
 	\http_response_code( 403 );
 	die( KILL_MSG );
 }
@@ -1446,10 +1449,11 @@ function fw_sanityCheck() {
 	return !\in_array( $mt, fw_trimmedList( \FIREWALL_METHODS, true ) );
 }
 
-function fw_insertLog() {
+function fw_insertLog( string $reason = '' ) {
 	$db	= fw_getDb();
 	$stm	= $db->prepare( \FIREWALL_DB_INSERT );
 	$stm->execute( [
+		':reason'	=> empty( $reason ) ? 'Unknown' : $reason,
 		':ip'		=> fw_getIP(), 
 		':ua'		=> fw_getUA(), 
 		':uri'		=> fw_getQS(), 
@@ -1474,7 +1478,7 @@ function fw_start() {
 	// Fresh request
 	foreach ( $filters as $f ) {
 		if ( $f() ) {
-			fw_instaKill();
+			fw_instaKill( $f );
 			
 			// Fallback
 			break;
