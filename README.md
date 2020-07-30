@@ -13,3 +13,5 @@ traffic in the firewall.db file in the writable directory.
 
 A lot of this was inspired by the [Bad Behavior](http://bad-behavior.ioerror.us) package but does not use  
 the same code.
+
+The [plugin](https://github.com/cypnk/Bare-Plugins/tree/master/firewall) version of this is available for [Bare](https://github.com/cypnk/Bare)
