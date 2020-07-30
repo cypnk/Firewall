@@ -80,14 +80,17 @@ CREATE INDEX idx_firewall_on_uri ON firewall ( uri ASC );-- --
 CREATE INDEX idx_firewall_on_method ON firewall ( method ASC );-- --
 CREATE INDEX idx_firewall_on_expires ON firewall ( expires DESC );-- --
 CREATE INDEX idx_firewall_on_created ON firewall ( created ASC );-- --
-CREATE TRIGGER firewall_insert AFTER INSERT ON firewall FOR EACH ROW 
+CREATE TRIGGER firewall_exp_insert AFTER INSERT ON firewall FOR EACH ROW 
+WHEN NEW.expires IS NULL 
 BEGIN
 	UPDATE firewall SET 
 		expires = datetime( 
 			( strftime( '%s','now' ) + 604800 ), 
 			'unixepoch'
 		) WHERE rowid = NEW.rowid;
-	
+END;-- --
+CREATE TRIGGER firewall_insert AFTER INSERT ON firewall FOR EACH ROW 
+BEGIN
 	DELETE FROM firewall WHERE 
 		strftime( '%s', expires ) < 
 		strftime( '%s', created );
