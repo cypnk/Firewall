@@ -759,6 +759,7 @@ function fw_uaCheck() {
 		'Pump',
 		'PussyCat',
 		'PycURL',
+		'python-requests',
 		'Python-urllib',
 		'qiqi',
 		'QueryN',
