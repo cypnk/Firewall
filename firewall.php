@@ -287,6 +287,84 @@ function fw_inSubnet( $ip, $subnet ) {
 	return false;
 }
 
+// Forwarded HTTP header chain from load balancer
+function fw_getForwarded() : array {
+	static $fwd;
+	if ( isset( $fwd ) ) {
+		return $fwd;
+	}
+	
+	$fwd	= [];
+	$terms	= 
+		$_SERVER['HTTP_FORWARDED'] ??
+		$_SERVER['FORWARDED'] ?? 
+		$_SERVER['HTTP_X_FORWARDED'] ?? '';
+	
+	// No headers forwarded
+	if ( empty( $terms ) ) {
+		return [];
+	}
+	
+	$pt	= explode( ';', $terms );
+	
+	// Gather forwarded values
+	foreach ( $pt as $p ) {
+		// Break into comma delimited list, if any
+		$chain = \array_map( 'trim', explode( ',', $p ) );
+		if ( empty( $chain ) ) {
+			continue;
+		}
+		
+		foreach ( $chain as $c ) {
+			$k = explode( '=', $c );
+			// Skip empty or odd values
+			if ( count( $k ) != 2 ) {
+				continue;
+			}
+			
+			// Existing key?
+			if ( isset( $fwd[$k[0]] ) ) {
+				// Existing array? Append
+				if ( \is_array( $fwd[$k[0]] ) ) {
+					$fwd[$k[0]][] = $k[1];
+				
+				// Multiple values? 
+				// Convert to array and then append new
+				} else {
+					$tmp		= $fwd[$k[0]];
+					$fwd[$k[0]]	= [];
+					$fwd[$k[0]][]	= $tmp;
+					$fwd[$k[0]][]	= $k[1];
+ 				}
+			// Fresh value
+			} else {
+				$fwd[$k[0]] = $k[1];
+			}
+		}
+	}
+	return $fwd;
+}
+
+// Get the current IP address connection chain including given proxies
+function fw_getProxyChain() : array {
+	static $chain;
+	
+	if ( isset( $chain ) ) {
+		return $chain;
+	}
+	
+	$chain = 
+	\array_map( 'trim', 
+		explode( ',',  
+			$_SERVER['HTTP_X_FORWARDED_FOR'] ?? 
+			$_SERVER['HTTP_CLIENT_IP'] ?? 
+			$_SERVER['REMOTE_ADDR'] ?? '' 
+		) 
+	);
+	
+	return $chain;
+}
+
 // Browser User Agent
 function fw_getUA() {
 	static $ua;
@@ -315,8 +393,27 @@ function fw_getIP() {
 	if ( isset( $ip ) ) {
 		return $ip;
 	}
+	
+	$fwd = fw_getForwarded();
+	
+	// Get IP from reverse proxy, if set
+	if ( \array_key_exists( 'for', $fwd ) ) {
+		$ip = 
+		\is_array( $fwd['for'] ) ? 
+			\array_shift( $fwd['for'] ) : 
+			( string ) $fwd['for'];
+	
+	// Get from sent headers
+	} else {
+		$raw = fw_getProxyChain();
+		if ( empty( $raw ) ) {
+			$ip = '';
+			return '';
+		}
 		
-	$ip	= $_SERVER['REMOTE_ADDR'];
+		$ip	= ( string ) \array_shift( $raw );
+	}
+	
 	$va	= 
 	( SKIP_LOCAL ) ?
 		\filter_var( $ip, \FILTER_VALIDATE_IP ) : 
