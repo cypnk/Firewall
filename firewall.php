@@ -1118,9 +1118,13 @@ function fw_uriCheck() {
 
 // Check browser and platform matches
 function fw_browserCompat( $ua ) {
+	$ie		= fw_has( $ua, 'MSIE' );
 	$safari		= fw_has( $ua, 'Safari' );
 	$chrome		= fw_has( $ua, 'Chrome' );
 	$trident	= fw_has( $ua, 'Trident' );
+	$khtml		= fw_has( $ua, 'KHTML' );
+	$brave		= fw_has( $ua, 'Brave' );
+	$android	= fw_has( $ua, 'Android' );
 	
 	// Browser can't be Chrome, Safari, *and* Trident
 	if ( $chrome && $safari && $trident ) {
@@ -1150,7 +1154,7 @@ function fw_browserCompat( $ua ) {
 	}
 	
 	// Fake IE
-	if ( fw_has( $ua, 'MSIE' ) && !$trident ) {
+	if ( $ie && !$trident ) {
 		return true;
 	}
 	
@@ -1197,10 +1201,27 @@ function fw_browserCompat( $ua ) {
 	}
 	
 	// User agent switcher
-	if ( 
-		fw_has( $ua, 'Windows Phone' ) && 
-		fw_has( $ua, 'Android' ) 
-	) {
+	if ( fw_has( $ua, 'Windows Phone' ) && $android ) {
+		return true;
+	}
+	
+	// Recent Brave has all 3
+	if ( !$chrome && !$safari && !$khtml && $brave ) {
+		return true;
+	}
+	
+	// Brave should't have IE
+	if ( $ie && $brave || $trident && $brave ) {
+		return true;
+	}
+	
+	// Brave should present Win64, not Wow64
+	if ( $brave && $wow64 ) {
+		return true;
+	}
+	
+	// If on Android, Linux should be present in Brave
+	if ( $brave && $android && !$linux ) {
 		return true;
 	}
 	
