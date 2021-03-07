@@ -48,6 +48,9 @@ define( 'FIREWALL_METHODS',
 // Enable/Disable firewall database logging
 define( 'FIREWALL_DB_LOG',		1 );
 
+// Maximum header size
+define( 'FIREWALL_MAX_HEADER',		512 );
+
 
 /**********************
  *  Configuration end
@@ -1487,7 +1490,21 @@ function fw_getHeaders() {
 }
 
 function fw_headerCheck() {
-	$val = fw_getHeaders();
+	$val	= fw_getHeaders();
+	$c	= '';
+	
+	foreach ( $val as $k => $v ) {
+		// Header shouldn't be too long
+		if ( \mb_strlen( $v, '8bit' ) > \FIREWALL_MAX_HEADER ) {
+			return true;
+		}
+		
+		// Shouldn't have strange characters
+		$c = \preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F\x80-\x9F\x{fdd0}-\x{fdef}]/u', '', $v );
+		if ( 0 != \strcasecmp( $v, $c ) ) {
+			return true;
+		}
+	}
 	
 	// Contradicting or empty connections
 	$cn	= $val['connection'] ?? '';
