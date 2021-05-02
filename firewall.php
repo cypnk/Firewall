@@ -33,6 +33,7 @@ HTML
 
 // Location of your database file (based on relative path)
 // This will be where Firewall creates a SQLite database
+// Make sure to create the /data folder, if you're logging, and set permissions to 0755 on *nix
 define( 'FIREWALL_DB', 
 	\realpath( \dirname( __FILE__ ) ) . '/data/firewall.db' );
 
