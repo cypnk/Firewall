@@ -1236,11 +1236,18 @@ function fw_browserCompat( $ua ) {
 // Closer evaluation
 function fw_browserCheck( $ua, $val ) {
 	// Browsers should send Accept
-	if ( !\array_key_exists( 'accept', $val ) ) {
+	if (
+		!\array_key_exists( 'accept', $val ) && 
+	    	!\array_key_exists( 'accept-encoding', $val ) 
+	) {
 		return true;
 	}
 	
-	$pr	= $_SERVER['SERVER_PROTOCOL'];
+	$pr	= $_SERVER['SERVER_PROTOCOL'] ?? '';
+	// No valid protocol
+	if ( empty( $pr ) ) {
+		return true;
+	}
 	
 	// Expect and HTTP/1.0 shouldn't go together
 	if (
