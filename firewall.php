@@ -487,6 +487,17 @@ function fw_uaCheck() {
 		'.NET_CLR',
 		'.NET-CLR',
 		
+		// Troublesome TLDs
+		'.bid',
+		'.cam',
+		'.cf',
+		'.gq',
+		'.ml',
+		'.surf',
+		'.today',
+		'.work',
+		'.xyz',
+		
 		'\r',
 		'<sc',
 		'(Chrome)',
@@ -500,8 +511,9 @@ function fw_uaCheck() {
 		'Aboundex',
 		'Acunetix',
 		'adwords',
-		'Alexibot',
 		'AIBOT',
+		'Alexibot',
+		'ALittle Client',
 		
 		// Misspelled "Android"
 		'Andriod',
@@ -621,6 +633,7 @@ function fw_uaCheck() {
 		'Enchanc',
 		'EroCrawler',
 		'Exabot',
+		'expanseinc',
 		'Express WebPictures',
 		
 		// Extractors
@@ -855,6 +868,7 @@ function fw_uaCheck() {
 		'PowerMapper',
 		'ProPowerBot',
 		'proximic',
+		'psamma',
 		'psbot',
 		'psycheclone',
 		'Pump',
@@ -884,6 +898,7 @@ function fw_uaCheck() {
 		// Scraper
 		'Scrapy',
 		
+		'scaninfo',
 		'Shockwave Flash',
 		'SemrushBot',
 		'sentiment',
