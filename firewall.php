@@ -52,6 +52,12 @@ define( 'FIREWALL_DB_LOG',		1 );
 // Maximum header size
 define( 'FIREWALL_MAX_HEADER',		512 );
 
+// Enable in depth header checking
+define( 'FIREWALL_HEADER_CHECK',	1 );
+
+// Enable browser UA checking
+define( 'FIREWALL_UA_CHECK',		1 );
+
 
 /**********************
  *  Configuration end
@@ -433,6 +439,10 @@ function fw_getIP() {
 }
 
 function fw_uaCheck() {
+	if ( !\FIREWALL_UA_CHECK ) {
+		return false;
+	}
+	
 	$ua	= fw_getUA();
 	
 	// User Agent contains non-ASCII characters?
@@ -1582,6 +1592,11 @@ function fw_headerCheck() {
 		) {
 			return true;
 		}
+	}
+	
+	// Continue checking headers in depth?
+	if ( !\FIREWALL_HEADER_CHECK ) {
+		return false;
 	}
 	
 	$ua	= fw_getUA();
