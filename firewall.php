@@ -41,6 +41,9 @@ define( 'FIREWALL_DB',
 // define( 'FIREWALL_DB',
 //	\realpath( \dirname( __FILE__, 2 ) ) . '/data/firewall.db' );
 
+// Firewall search engines based on IP address 
+// (this may block legitimate traffic)
+define( 'FIREWALL_IP_BOTS',		0 );
 
 // Whitelist of HTTP methods (these fall through to be handled by your script)
 define( 'FIREWALL_METHODS', 
@@ -1408,6 +1411,11 @@ function fw_botCheck() {
 		if ( fw_inSubnet( $ip, $localip ) ) {
 			return true;
 		}
+	}
+	
+	// Skip further bot checking
+	if ( !\FIREWALL_IP_BOTS ) {
+		return false;
 	}
 	
 	$ua = fw_getUA();
