@@ -1653,6 +1653,8 @@ function fw_insertLog( string $reason = '' ) {
 		':method'	=> fw_getMethod(), 
 		':headers'	=> \implode( "\n", fw_getHeaders() )
 	] );
+	$stm->closeCursor();
+	$stm	= null;
 	
 	// Close DB Connection
 	fw_getDb( true );
