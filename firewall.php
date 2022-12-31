@@ -49,8 +49,8 @@ define( 'FIREWALL_IP_BOTS',		0 );
 define( 'FIREWALL_METHODS', 
 	'get, post, head, connect, options, patch, delete, put' );
 
-// Enable/Disable firewall database logging
-define( 'FIREWALL_DB_LOG',		1 );
+// Enable/Disable firewall database logging (defaults to not logging)
+define( 'FIREWALL_DB_LOG',		0 );
 
 // Maximum header size
 define( 'FIREWALL_MAX_HEADER',		512 );
