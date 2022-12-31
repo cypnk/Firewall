@@ -14,6 +14,6 @@ This setting enables checking for private IP ranges. Use `define( 'SKIP_LOCAL', 
 
 Firewall will keep track of blocked traffic in the firewall.db file in a writable directory, if the FIREWALL_DB_LOG setting is 1 or you can keep it off by leaving it as 0.
 
-A lot of this was inspired by the [Bad Behavior](http://bad-behavior.ioerror.us) package but does not use the same code.
+A lot of this was inspired by the [Bad Behavior](https://web.archive.org/web/20220711114927/bad-behavior.ioerror.us/) package but does not use the same code.
 
 The [plugin](https://github.com/cypnk/Bare-Plugins/tree/master/firewall) version of this is available for [Bare](https://github.com/cypnk/Bare)
